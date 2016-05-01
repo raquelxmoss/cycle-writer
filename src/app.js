@@ -1,4 +1,4 @@
-import {input, div, button} from '@cycle/dom'
+import {input, div, button, p} from '@cycle/dom'
 import keycode from 'keycode';
 import {Observable} from 'rx';
 import Showdown from 'showdown';
@@ -41,6 +41,12 @@ function addNewLine () {
   }
 }
 
+function toggleInstructions () {
+  return function processToggleInstructions (state) {
+    return Object.assign({}, state, {instructions: !state.instructions});
+  }
+}
+
 function squash (event) {
   return function stopThing (state) {
     event.preventDefault();
@@ -64,9 +70,15 @@ function renderText (text) {
 
 const initialState = {
 	text: "",
+  instructions: true
 }
 
 export default function App ({DOM, Keys}) {
+  const instructions$ = DOM
+    .select('.toggle-instructions')
+    .events('click')
+    .map(_ => toggleInstructions())
+
   const textInput$ = Keys.presses('keypress')
 
   const removeText$ = Keys.presses('keydown', 'backspace')
@@ -90,7 +102,8 @@ export default function App ({DOM, Keys}) {
 		removeText$,
     spacePress$,
     period$,
-    enter$
+    enter$,
+    instructions$
   );
 
   const state$ = action$
@@ -100,6 +113,12 @@ export default function App ({DOM, Keys}) {
   return {
     DOM: state$.map(state =>
 			div('.container', [
+        div('.toggle-instructions', 'Toggle Instructions'),
+        div(
+          '.instructions',
+          {style: {display: state.instructions ? 'block': 'none'}},
+          'Just write! You can use markdown syntax. Have fun!'
+        ),
 				div('.text', {innerHTML: renderText(state.text)}),
 			])
 		)

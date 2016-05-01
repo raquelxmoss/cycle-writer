@@ -11,7 +11,8 @@ html, body {
 
 .container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   flex-wrap: wrap;
   overflow-wrap: break-word;
 }
@@ -23,3 +24,16 @@ html, body {
 .text > * {
   max-width: 100%;
 }
+
+.toggle-instructions {
+  font-size: 11px;
+  padding: 5px;
+  align-self: flex-end;
+}
+
+.instructions {
+  font-size: 12px;
+  font-style: italic;
+  color: #E617A4;
+}
+
