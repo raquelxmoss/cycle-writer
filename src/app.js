@@ -2,7 +2,6 @@ import {input, div, button, p} from '@cycle/dom'
 import keycode from 'keycode';
 import {Observable} from 'rx';
 import Showdown from 'showdown';
-// implement cmd + backspace/ ctrl + backspace
 
 function updateText (event) {
 	return function processTextInput (state) {
@@ -47,14 +46,6 @@ function toggleInstructions () {
   }
 }
 
-function squash (event) {
-  return function stopThing (state) {
-    event.preventDefault();
-
-    return state;
-  }
-}
-
 function renderText (text) {
   const converter = new Showdown.Converter(
     {
@@ -81,19 +72,16 @@ export default function App ({DOM, Keys}) {
 
   const textInput$ = Keys.presses('keypress')
 
-  const removeText$ = Keys.presses('keydown', 'backspace')
-  .map(e => {
-    e.preventDefault();
+  const backspacePress$ = Keys.presses('keydown', 'backspace')
 
-    return removeText(e)
-  })
+  const spacePress$ = Keys.presses('keypress', 'space')
+
+  const removeText$ = backspacePress$
+    .map(e => removeText(e))
 
 	const addText$ = textInput$
 		.filter(e => e.which !== 8 && e.which !== 46)
 		.map(e => updateText(e));
-
-  const spacePress$ = Keys.presses('keypress', 'space')
-    .map(e => squash(e));
 
   const period$ = Keys.presses('keydown', '.')
     .map(_ => addPeriod());
@@ -104,7 +92,6 @@ export default function App ({DOM, Keys}) {
 	const action$ = Observable.merge(
 		addText$,
 		removeText$,
-    spacePress$,
     period$,
     enter$,
     instructions$
@@ -125,6 +112,7 @@ export default function App ({DOM, Keys}) {
         ),
 				div('.text', {innerHTML: renderText(state.text)}),
 			])
-		)
+		),
+    preventDefault: Observable.merge(backspacePress$, spacePress$)
   }
 }
