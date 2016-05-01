@@ -82,7 +82,11 @@ export default function App ({DOM, Keys}) {
   const textInput$ = Keys.presses('keypress')
 
   const removeText$ = Keys.presses('keydown', 'backspace')
-    .map(e => removeText(e))
+  .map(e => {
+    e.preventDefault();
+
+    return removeText(e)
+  })
 
 	const addText$ = textInput$
 		.filter(e => e.which !== 8 && e.which !== 46)
