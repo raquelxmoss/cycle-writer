@@ -1,7 +1,7 @@
 {
   "name": "cycle-writer",
   "version": "0.0.1",
-  "description": "A markdown editor written in Cycle.js",
+  "description": "A live-rendering markdown editor written in Cycle.js",
   "main": "index.js",
   "scripts": {
     "start": "babel-node server.js",
@@ -13,10 +13,9 @@
     "url": "https://github.com/raquelxmoss/cycle-writer.git"
   },
   "keywords": [
-    "hot",
-    "reloading",
-    "cycle.js",
-    "happiness"
+    "markdown",
+    "cycle",
+    "rx"
   ],
   "author": "Raquel Moss",
   "license": "MIT",
@@ -25,14 +24,17 @@
   },
   "homepage": "https://github.com/raquelxmoss/cycle-writer",
   "dependencies": {
+    "cycle-keys": "^0.1.0",
+    "keycode": "^2.1.1",
+    "rx": "^4.1.0",
+    "showdown": "^1.3.0"
+  },
+  "devDependencies": {
     "@cycle/core": "^6.0.0-rc2",
     "@cycle/dom": "^9.0.1",
     "@cycle/isolate": "^1.2.0",
-    "babel-preset-es2015": "^6.1.18",
     "cycle-restart": "0.0.14",
-    "rx": "^4.0.7"
-  },
-  "devDependencies": {
+    "babel-preset-es2015": "^6.1.18",
     "babel-cli": "^6.2.0",
     "babel-core": "^6.2.1",
     "babelify": "^7.2.0",
