@@ -4,11 +4,14 @@ import {restart, restartable} from 'cycle-restart';
 import {makeKeysDriver} from './src/drivers/keys-driver';
 import isolate from '@cycle/isolate';
 
+import preventDefaultDriver from './src/drivers/prevent-default-driver';
+
 var app = require('./src/app').default;
 
 const drivers = {
   DOM: restartable(makeDOMDriver('.app'), {pauseSinksWhileReplaying: false}),
-  Keys: restartable(makeKeysDriver())
+  Keys: restartable(makeKeysDriver()),
+  preventDefault: preventDefaultDriver
 };
 
 const {sinks, sources} = run(app, drivers);
