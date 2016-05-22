@@ -1,7 +1,7 @@
 import {run} from '@cycle/core';
 import {makeDOMDriver} from '@cycle/dom';
 import {restart, restartable} from 'cycle-restart';
-import {makeKeysDriver} from './src/drivers/keys-driver';
+import {makeKeysDriver} from 'cycle-keys';
 import isolate from '@cycle/isolate';
 
 import preventDefaultDriver from './src/drivers/prevent-default-driver';

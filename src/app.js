@@ -18,12 +18,31 @@ function updateText (event) {
 }
 
 function removeText (event) {
-  debugger
   return function processTextRemove (state) {
-    const text = state.text
-    .split('')
-    .slice(0, state.text.length - 1)
-    .join('');
+    let text = state.text
+
+    if (event.metaKey || event.ctrlKey) {
+      text = text
+        .split('\n')
+        .slice(0, state.text.split('\n').length - 1)
+        .join('\n');
+
+      return Object.assign({}, state, {text});
+    }
+
+    if (event.altKey) {
+      text = text
+        .split(' ')
+        .slice(0, state.text.split(' ').length - 1)
+        .join(' ');
+
+      return Object.assign({}, state, {text});
+    }
+
+    text = state.text
+      .split('')
+      .slice(0, state.text.length - 1)
+      .join('');
 
     return Object.assign({}, state, {text});
   }
@@ -71,11 +90,11 @@ export default function App ({DOM, Keys}) {
     .events('click')
     .map(_ => toggleInstructions())
 
-  const textInput$ = Keys.press('keypress')
+  const textInput$ = Keys.press()
 
-  const backspacePress$ = Keys.press('keydown', 'backspace')
+  const backspacePress$ = Keys.down('backspace')
 
-  const spacePress$ = Keys.press('keypress', 'space')
+  const spacePress$ = Keys.press('space')
 
   const removeText$ = backspacePress$
     .map(e => removeText(e))
@@ -84,10 +103,10 @@ export default function App ({DOM, Keys}) {
     .filter(e => e.which !== 8 && e.which !== 46)
     .map(e => updateText(e));
 
-  const period$ = Keys.presses('keydown', '.')
+  const period$ = Keys.down('.')
     .map(_ => addPeriod());
 
-  const enter$ = Keys.presses('keydown', 'enter')
+  const enter$ = Keys.down('enter')
     .map(_ => addNewLine());
 
   const action$ = Observable.merge(
