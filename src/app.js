@@ -4,28 +4,29 @@ import {Observable} from 'rx';
 import Showdown from 'showdown';
 
 function updateText (event) {
-	return function processTextInput (state) {
-		const isUppercase = event.shiftKey
-		const character = String.fromCharCode(event.which);
-		const newChar = isUppercase ? character : character.toLowerCase();
+  return function processTextInput (state) {
+    const isUppercase = event.shiftKey
+    const character = String.fromCharCode(event.which);
+    const newChar = isUppercase ? character : character.toLowerCase();
 
-		return Object.assign(
-			{},
-			state,
-			{text: state.text + newChar}
-		);
-	}
+    return Object.assign(
+      {},
+      state,
+      {text: state.text + newChar}
+    );
+  }
 }
 
 function removeText (event) {
-	return function processTextRemove (state) {
-		const text = state.text
-			.split('')
-			.slice(0, state.text.length - 1)
-			.join('');
+  debugger
+  return function processTextRemove (state) {
+    const text = state.text
+    .split('')
+    .slice(0, state.text.length - 1)
+    .join('');
 
-		return Object.assign({}, state, {text});
-	}
+    return Object.assign({}, state, {text});
+  }
 }
 
 function addPeriod () {
@@ -60,7 +61,7 @@ function renderText (text) {
 }
 
 const initialState = {
-	text: "",
+  text: "",
   instructions: true
 }
 
@@ -70,18 +71,18 @@ export default function App ({DOM, Keys}) {
     .events('click')
     .map(_ => toggleInstructions())
 
-  const textInput$ = Keys.presses('keypress')
+  const textInput$ = Keys.press('keypress')
 
-  const backspacePress$ = Keys.presses('keydown', 'backspace')
+  const backspacePress$ = Keys.press('keydown', 'backspace')
 
-  const spacePress$ = Keys.presses('keypress', 'space')
+  const spacePress$ = Keys.press('keypress', 'space')
 
   const removeText$ = backspacePress$
     .map(e => removeText(e))
 
-	const addText$ = textInput$
-		.filter(e => e.which !== 8 && e.which !== 46)
-		.map(e => updateText(e));
+  const addText$ = textInput$
+    .filter(e => e.which !== 8 && e.which !== 46)
+    .map(e => updateText(e));
 
   const period$ = Keys.presses('keydown', '.')
     .map(_ => addPeriod());
@@ -89,9 +90,9 @@ export default function App ({DOM, Keys}) {
   const enter$ = Keys.presses('keydown', 'enter')
     .map(_ => addNewLine());
 
-	const action$ = Observable.merge(
-		addText$,
-		removeText$,
+  const action$ = Observable.merge(
+    addText$,
+    removeText$,
     period$,
     enter$,
     instructions$
@@ -103,16 +104,16 @@ export default function App ({DOM, Keys}) {
 
   return {
     DOM: state$.map(state =>
-			div('.container', [
+      div('.container', [
         div('.toggle-instructions', 'Toggle Instructions'),
-        div(
-          '.instructions',
-          {style: {display: state.instructions ? 'block': 'none'}},
-          'Just write! You can use markdown syntax. Have fun!'
-        ),
-				div('.text', {innerHTML: renderText(state.text)}),
-			])
-		),
-    preventDefault: Observable.merge(backspacePress$, spacePress$)
+          div(
+            '.instructions',
+            {style: {display: state.instructions ? 'block': 'none'}},
+            'Just write! You can use markdown syntax. Have fun!'
+          ),
+          div('.text', {innerHTML: renderText(state.text)}),
+        ])
+       ),
+   preventDefault: Observable.merge(backspacePress$, spacePress$)
   }
 }
