@@ -19,30 +19,20 @@ function updateText (event) {
 
 function removeText (event) {
   return function processTextRemove (state) {
-    let text = state.text
+    let modifier = '';
 
     if (event.metaKey || event.ctrlKey) {
-      text = text
-        .split('\n')
-        .slice(0, state.text.split('\n').length - 1)
-        .join('\n');
-
-      return Object.assign({}, state, {text});
+      modifier = '\n';
     }
 
     if (event.altKey) {
-      text = text
-        .split(' ')
-        .slice(0, state.text.split(' ').length - 1)
-        .join(' ');
-
-      return Object.assign({}, state, {text});
+      modifier = ' ';
     }
 
-    text = state.text
-      .split('')
-      .slice(0, state.text.length - 1)
-      .join('');
+    const text = state.text
+      .split(modifier)
+      .slice(0, state.text.split(modifier).length - 1)
+      .join(modifier);
 
     return Object.assign({}, state, {text});
   }
