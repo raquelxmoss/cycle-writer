@@ -1,6 +1,5 @@
 import budo from 'budo';
 import babelify from 'babelify';
-import hotModuleReloading from 'browserify-hmr';
 
 budo('./index.js', {
   serve: 'bundle.js',
@@ -9,6 +8,5 @@ budo('./index.js', {
   stream: process.stdout,
   browserify: {
     transform: babelify,
-    plugin: hotModuleReloading
   }
 });

@@ -1,25 +1,15 @@
-import {run} from '@cycle/core';
+import {run} from '@cycle/xstream-run';
 import {makeDOMDriver} from '@cycle/dom';
-import {restart, restartable} from 'cycle-restart';
 import {makeKeysDriver} from 'cycle-keys';
-import isolate from '@cycle/isolate';
 
 import preventDefaultDriver from './src/drivers/prevent-default-driver';
 
-var app = require('./src/app').default;
+import app from './src/app';
 
 const drivers = {
-  DOM: restartable(makeDOMDriver('.app'), {pauseSinksWhileReplaying: false}),
-  Keys: restartable(makeKeysDriver()),
+  DOM: makeDOMDriver('.app'),
+  Keys: makeKeysDriver(),
   preventDefault: preventDefaultDriver
 };
 
-const {sinks, sources} = run(app, drivers);
-
-if (module.hot) {
-  module.hot.accept('./src/app', () => {
-    app = require('./src/app').default;
-
-    restart(app, drivers, {sinks, sources}, isolate);
-  });
-}
+run(app, drivers);
