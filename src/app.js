@@ -1,11 +1,10 @@
-import {input, div, button, p} from '@cycle/dom'
-import keycode from 'keycode';
-import {Observable} from 'rx';
+import {div} from '@cycle/dom';
+import xs from 'xstream';
 import Showdown from 'showdown';
 
 function updateText (event) {
-  return function processTextInput (state) {
-    const isUppercase = event.shiftKey
+  return function _updateText (state) {
+    const isUppercase = event.shiftKey;
     const character = String.fromCharCode(event.which);
     const newChar = isUppercase ? character : character.toLowerCase();
 
@@ -14,11 +13,11 @@ function updateText (event) {
       state,
       {text: state.text + newChar}
     );
-  }
+  };
 }
 
 function removeText (event) {
-  return function processTextRemove (state) {
+  return function _removeText (state) {
     let modifier = '';
 
     if (event.metaKey || event.ctrlKey) {
@@ -35,25 +34,25 @@ function removeText (event) {
       .join(modifier);
 
     return Object.assign({}, state, {text});
-  }
+  };
 }
 
 function addPeriod () {
-  return function processAddPeriod (state) {
+  return function _addPeriod (state) {
     return Object.assign({}, state, {text: state.text + '.'});
-  }
+  };
 }
 
 function addNewLine () {
-  return function processAddNewLine (state) {
+  return function _addNewLine (state) {
     return Object.assign({}, state, {text: state.text + '\n'});
-  }
+  };
 }
 
 function toggleInstructions () {
-  return function processToggleInstructions (state) {
+  return function _toggleInstructions (state) {
     return Object.assign({}, state, {instructions: !state.instructions});
-  }
+  };
 }
 
 function renderText (text) {
@@ -69,37 +68,55 @@ function renderText (text) {
   return converter.makeHtml(text);
 }
 
-const initialState = {
-  text: "",
-  instructions: true
+function view (state) {
+  const instructionsStyle = {
+    display: state.instructions ? 'block' : 'none'
+  };
+
+  return (
+    div('.container', [
+      div('.toggle-instructions', 'Toggle Instructions'),
+      div(
+        '.instructions',
+        {style: instructionsStyle},
+        'Just write! You can use markdown syntax. Have fun!'
+      ),
+      div('.text', {props:{innerHTML: renderText(state.text)}})
+    ])
+  );
 }
+
+const initialState = {
+  text: '',
+  instructions: true
+};
 
 export default function App ({DOM, Keys}) {
   const instructions$ = DOM
     .select('.toggle-instructions')
     .events('click')
-    .map(_ => toggleInstructions())
+    .map(toggleInstructions);
 
-  const textInput$ = Keys.press()
+  const textInput$ = Keys.press();
 
-  const backspacePress$ = Keys.down('backspace')
+  const backspacePress$ = Keys.down('backspace');
 
-  const spacePress$ = Keys.press('space')
+  const spacePress$ = Keys.press('space');
 
   const removeText$ = backspacePress$
-    .map(e => removeText(e))
+    .map(removeText);
 
   const addText$ = textInput$
     .filter(e => e.which !== 8 && e.which !== 46)
-    .map(e => updateText(e));
+    .map(updateText);
 
   const period$ = Keys.down('.')
-    .map(_ => addPeriod());
+    .map(addPeriod);
 
   const enter$ = Keys.down('enter')
-    .map(_ => addNewLine());
+    .map(addNewLine);
 
-  const action$ = Observable.merge(
+  const action$ = xs.merge(
     addText$,
     removeText$,
     period$,
@@ -108,21 +125,10 @@ export default function App ({DOM, Keys}) {
   );
 
   const state$ = action$
-    .startWith(initialState)
-    .scan((state, action) => action(state))
+    .fold((state, action) => action(state), initialState);
 
   return {
-    DOM: state$.map(state =>
-      div('.container', [
-        div('.toggle-instructions', 'Toggle Instructions'),
-          div(
-            '.instructions',
-            {style: {display: state.instructions ? 'block': 'none'}},
-            'Just write! You can use markdown syntax. Have fun!'
-          ),
-          div('.text', {innerHTML: renderText(state.text)}),
-        ])
-       ),
-   preventDefault: Observable.merge(backspacePress$, spacePress$)
-  }
+    DOM: state$.map(view),
+    preventDefault: xs.merge(backspacePress$, spacePress$)
+  };
 }
